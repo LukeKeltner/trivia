@@ -1,23 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { get, post } from '../lib/api'
+import { post } from '../lib/api'
 
 export default function Question() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { topic, coins, bet } = state ?? {}
-  const [question, setQuestion] = useState(null)
+  const { topic, coins, bet, question } = state ?? {}
   const [selected, setSelected] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (!topic) { navigate('/'); return }
-    get(`/questions/random?topic_id=${topic.id}`).then(setQuestion)
-  }, [topic])
-
-  if (!topic) return null
+  if (!topic || !question) { navigate('/'); return null }
 
   async function handleSubmit() {
     if (!selected || submitting) return

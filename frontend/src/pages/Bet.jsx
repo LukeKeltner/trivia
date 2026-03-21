@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { get } from '../lib/api'
 
 const QUICK_BETS = [
   { label: '25%', pct: 0.25 },
@@ -14,15 +15,23 @@ export default function Bet() {
   const { topic, coins } = state ?? {}
   const [bet, setBet] = useState('')
   const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   if (!topic) { navigate('/'); return null }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const amount = parseInt(bet)
     if (!amount || amount <= 0) return setError('Enter a valid bet.')
     if (amount > coins) return setError("You don't have enough coins.")
-    navigate('/question', { state: { topic, coins, bet: amount } })
+    setLoading(true)
+    try {
+      const question = await get(`/questions/random?topic_id=${topic.id}`)
+      navigate('/question', { state: { topic, coins, bet: amount, question } })
+    } catch {
+      setError('Failed to load question. Try again.')
+      setLoading(false)
+    }
   }
 
   function quickBet(pct) {
@@ -64,7 +73,6 @@ export default function Bet() {
               />
             </div>
 
-            {/* Quick bet buttons */}
             <div className="grid grid-cols-4 gap-2">
               {QUICK_BETS.map(({ label, pct }) => (
                 <button
@@ -86,9 +94,10 @@ export default function Bet() {
 
             <button
               type="submit"
-              className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-4 rounded-xl font-black text-lg transition"
+              disabled={loading}
+              className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-4 rounded-xl font-black text-lg transition disabled:opacity-50"
             >
-              Place Bet 🎲
+              {loading ? 'Loading...' : 'Place Bet 🎲'}
             </button>
           </form>
         </div>
