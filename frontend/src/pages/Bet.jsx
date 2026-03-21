@@ -27,6 +27,7 @@ export default function Bet() {
     setLoading(true)
     try {
       const question = await get(`/questions/random?topic_id=${topic.id}`)
+      question.answers = question.answers.sort(() => Math.random() - 0.5)
       navigate('/question', { state: { topic, coins, bet: amount, question } })
     } catch {
       setError('Failed to load question. Try again.')
