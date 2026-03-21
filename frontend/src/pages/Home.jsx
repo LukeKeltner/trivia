@@ -18,6 +18,7 @@ export default function Home() {
   const [coins, setCoins] = useState(null)
   const [toppedUp, setToppedUp] = useState(false)
   const [topics, setTopics] = useState([])
+  const [progress, setProgress] = useState({})
 
   useEffect(() => {
     get(`/game/profile/${user.id}`).then(data => {
@@ -25,6 +26,11 @@ export default function Home() {
       setToppedUp(data.topped_up)
     })
     get('/topics/').then(setTopics)
+    get(`/game/progress/${user.id}`).then(data => {
+      const map = {}
+      data.forEach(p => { map[p.topic_id] = p })
+      setProgress(map)
+    })
   }, [user.id])
 
   function selectTopic(topic) {
@@ -82,6 +88,11 @@ export default function Home() {
                 >
                   <div className="text-4xl mb-2">{style.emoji}</div>
                   <p className={`font-black text-base ${style.text}`}>{topic.name}</p>
+                  {progress[topic.id] && (
+                    <p className={`text-xs font-bold mt-2 opacity-60 ${style.text}`}>
+                      {Math.round((progress[topic.id].completed / progress[topic.id].total) * 100)}% complete
+                    </p>
+                  )}
                 </button>
               )
             })}
