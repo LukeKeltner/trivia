@@ -80,17 +80,31 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             {topics.map(topic => {
               const style = TOPIC_STYLES[topic.name] ?? DEFAULT_STYLE
+              const p = progress[topic.id]
+              const completed = p && p.completed === p.total && p.total > 0
+              const pct = p ? Math.round((p.completed / p.total) * 100) : null
+
               return (
                 <button
                   key={topic.id}
-                  onClick={() => selectTopic(topic)}
-                  className={`${style.bg} ${style.hover} border-2 ${style.border} rounded-2xl p-6 text-center transition`}
+                  onClick={() => !completed && selectTopic(topic)}
+                  disabled={completed}
+                  className={`border-2 rounded-2xl p-6 text-center transition relative ${
+                    completed
+                      ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-75'
+                      : `${style.bg} ${style.hover} ${style.border} cursor-pointer`
+                  }`}
                 >
-                  <div className="text-4xl mb-2">{style.emoji}</div>
-                  <p className={`font-black text-base ${style.text}`}>{topic.name}</p>
-                  {progress[topic.id] && (
-                    <p className={`text-xs font-bold mt-2 opacity-60 ${style.text}`}>
-                      {Math.round((progress[topic.id].completed / progress[topic.id].total) * 100)}% complete
+                  {completed && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">🎉</div>
+                  )}
+                  <div className="text-4xl mb-2">{completed ? '✅' : style.emoji}</div>
+                  <p className={`font-black text-base ${completed ? 'text-gray-500' : style.text}`}>
+                    {topic.name}
+                  </p>
+                  {pct !== null && (
+                    <p className={`text-xs font-bold mt-2 ${completed ? 'text-gray-400' : `opacity-60 ${style.text}`}`}>
+                      {completed ? 'Mastered!' : `${pct}% complete`}
                     </p>
                   )}
                 </button>
