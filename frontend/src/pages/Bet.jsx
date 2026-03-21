@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { get } from '../lib/api'
 
 const QUICK_BETS = [
@@ -12,6 +13,7 @@ const QUICK_BETS = [
 export default function Bet() {
   const { state } = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { topic, coins } = state ?? {}
   const [bet, setBet] = useState('')
   const [error, setError] = useState(null)
@@ -26,11 +28,16 @@ export default function Bet() {
     if (amount > coins) return setError("You don't have enough coins.")
     setLoading(true)
     try {
-      const question = await get(`/questions/random?topic_id=${topic.id}`)
+      const question = await get(`/questions/random?topic_id=${topic.id}&user_id=${user.id}`)
       question.answers = question.answers.sort(() => Math.random() - 0.5)
       navigate('/question', { state: { topic, coins, bet: amount, question } })
-    } catch {
-      setError('Failed to load question. Try again.')
+    } catch (err) {
+      const body = JSON.parse(err.message)
+      if (body?.detail === 'NO_QUESTIONS_LEFT') {
+        setError("You've answered all questions in this topic correctly! Try another topic.")
+      } else {
+        setError('Failed to load question. Try again.')
+      }
       setLoading(false)
     }
   }
