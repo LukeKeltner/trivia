@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #7C3AED;
+  --color-primary-hover: #6D28D9;
+  --color-primary-light: #EDE9FE;
+  --color-game-bg: #F5F3FF;
+  --color-gold: #F59E0B;
+  --color-gold-light: #FEF3C7;
+}
+
+@layer base {
+  body {
+    font-family: "Nunito", system-ui, sans-serif;
+  }
+}

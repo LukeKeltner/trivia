@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { get } from '../lib/api'
 
+const TOPIC_STYLES = {
+  'Pop Culture': { emoji: '🎬', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700', hover: 'hover:bg-pink-100' },
+  'Science':     { emoji: '🔬', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', hover: 'hover:bg-blue-100' },
+}
+const DEFAULT_STYLE = { emoji: '🎯', bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', hover: 'hover:bg-gray-100' }
+
 export default function Home() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
@@ -19,34 +25,55 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center gap-8 p-6">
-      <div className="w-full max-w-md flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">Trivia</h1>
-        <button onClick={signOut} className="text-sm text-gray-500 hover:text-red-500">
-          Sign Out
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl shadow p-6 w-full max-w-md text-center">
-        <p className="text-gray-500 text-sm">Your Balance</p>
-        <p className="text-5xl font-bold text-yellow-500 mt-1">
-          {coins ?? '...'} <span className="text-2xl">coins</span>
-        </p>
-      </div>
-
+    <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center p-6 pt-10">
       <div className="w-full max-w-md">
-        <h2 className="text-lg font-semibold text-gray-700 mb-3">Pick a Topic</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {topics.map(topic => (
-            <button
-              key={topic.id}
-              onClick={() => selectTopic(topic)}
-              className="bg-white rounded-xl shadow p-6 text-center font-semibold text-gray-800 hover:bg-blue-50 hover:shadow-md transition"
-            >
-              {topic.name}
-            </button>
-          ))}
+
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-black text-[var(--color-primary)]">🧠 Trivia</h1>
+            <p className="text-gray-400 font-semibold text-sm">{user?.email}</p>
+          </div>
+          <button
+            onClick={signOut}
+            className="text-sm font-bold text-gray-400 hover:text-red-400 transition"
+          >
+            Sign Out
+          </button>
         </div>
+
+        {/* Coin Balance */}
+        <div className="bg-white rounded-3xl shadow-sm p-6 mb-8 text-center border-2 border-[var(--color-primary-light)]">
+          <p className="text-gray-400 font-bold text-sm uppercase tracking-wide mb-1">Your Balance</p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-4xl">🪙</span>
+            <span className="text-5xl font-black text-[var(--color-gold)]">
+              {coins ?? '...'}
+            </span>
+          </div>
+          <p className="text-gray-400 font-semibold text-sm mt-1">coins</p>
+        </div>
+
+        {/* Topic Picker */}
+        <div>
+          <h2 className="text-lg font-black text-gray-700 mb-4">Pick a Topic</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {topics.map(topic => {
+              const style = TOPIC_STYLES[topic.name] ?? DEFAULT_STYLE
+              return (
+                <button
+                  key={topic.id}
+                  onClick={() => selectTopic(topic)}
+                  className={`${style.bg} ${style.hover} border-2 ${style.border} rounded-2xl p-6 text-center transition`}
+                >
+                  <div className="text-4xl mb-2">{style.emoji}</div>
+                  <p className={`font-black text-base ${style.text}`}>{topic.name}</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
       </div>
     </div>
   )

@@ -20,12 +20,7 @@ export default function Login() {
 
     if (isSignUp) {
       const { data, error } = await signUp(email, password)
-      if (error) {
-        setError(error.message)
-        setLoading(false)
-        return
-      }
-      // Create profile in our backend with starting 100 coins
+      if (error) { setError(error.message); setLoading(false); return }
       await fetch(`${API_URL}/game/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,22 +28,24 @@ export default function Login() {
       })
     } else {
       const { error } = await signIn(email, password)
-      if (error) {
-        setError(error.message)
-        setLoading(false)
-        return
-      }
+      if (error) { setError(error.message); setLoading(false); return }
     }
 
     navigate('/')
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          {isSignUp ? 'Create Account' : 'Sign In'}
-        </h1>
+    <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center justify-center p-6">
+      <div className="mb-8 text-center">
+        <div className="text-6xl mb-3">🧠</div>
+        <h1 className="text-4xl font-black text-[var(--color-primary)]">Trivia</h1>
+        <p className="text-gray-500 mt-1 font-semibold">Test your knowledge. Win coins.</p>
+      </div>
+
+      <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-sm">
+        <h2 className="text-xl font-black text-gray-800 mb-6 text-center">
+          {isSignUp ? 'Create Account' : 'Welcome Back'}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -57,7 +54,7 @@ export default function Login() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-[var(--color-primary)] transition"
           />
           <input
             type="password"
@@ -65,25 +62,29 @@ export default function Login() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-[var(--color-primary)] transition"
           />
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <div className="bg-red-50 text-red-600 text-sm font-semibold px-4 py-2 rounded-xl">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+            className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-3 rounded-xl font-black text-lg transition disabled:opacity-50"
           >
-            {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
+            {loading ? '...' : isSignUp ? 'Sign Up' : 'Sign In'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-400 font-semibold mt-5">
           {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
           <button
             onClick={() => { setIsSignUp(!isSignUp); setError(null) }}
-            className="text-blue-600 hover:underline"
+            className="text-[var(--color-primary)] hover:underline"
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>

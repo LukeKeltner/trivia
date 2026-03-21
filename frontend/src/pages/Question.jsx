@@ -32,44 +32,63 @@ export default function Question() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center gap-6 p-6">
-      <div className="bg-white rounded-xl shadow p-8 w-full max-w-lg">
-        <div className="flex justify-between text-sm text-gray-500 mb-6">
-          <span>{topic.name}</span>
-          <span>Bet: <span className="font-semibold text-yellow-500">{bet} coins</span></span>
+    <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-lg">
+
+        {/* Meta bar */}
+        <div className="flex justify-between items-center mb-6">
+          <span className="bg-white border-2 border-gray-100 text-gray-600 font-black text-sm px-4 py-2 rounded-full">
+            {topic.name}
+          </span>
+          <span className="bg-[var(--color-gold-light)] text-[var(--color-gold)] font-black text-sm px-4 py-2 rounded-full">
+            🪙 {bet} on the line
+          </span>
         </div>
 
-        {!question ? (
-          <p className="text-center text-gray-400">Loading question...</p>
-        ) : (
-          <>
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">{question.question_text}</h2>
+        <div className="bg-white rounded-3xl shadow-sm p-8">
+          {!question ? (
+            <p className="text-center text-gray-400 font-bold py-8">Loading question...</p>
+          ) : (
+            <>
+              <h2 className="text-xl font-black text-gray-800 mb-8 leading-snug">
+                {question.question_text}
+              </h2>
 
-            <div className="space-y-3">
-              {question.answers.map(answer => (
-                <button
-                  key={answer.id}
-                  onClick={() => setSelected(answer)}
-                  className={`w-full text-left px-4 py-3 rounded-lg border transition ${
-                    selected?.id === answer.id
-                      ? 'border-blue-500 bg-blue-50 text-blue-800'
-                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {answer.answer_text}
-                </button>
-              ))}
-            </div>
+              <div className="space-y-3 mb-8">
+                {question.answers.map((answer, i) => {
+                  const letters = ['A', 'B', 'C', 'D']
+                  const isSelected = selected?.id === answer.id
+                  return (
+                    <button
+                      key={answer.id}
+                      onClick={() => setSelected(answer)}
+                      className={`w-full text-left px-4 py-4 rounded-2xl border-2 font-bold transition flex items-center gap-3 ${
+                        isSelected
+                          ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)]'
+                          : 'border-gray-100 hover:border-[var(--color-primary-light)] hover:bg-gray-50 text-gray-700'
+                      }`}
+                    >
+                      <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
+                        isSelected ? 'bg-[var(--color-primary)] text-white' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {letters[i] ?? i + 1}
+                      </span>
+                      {answer.answer_text}
+                    </button>
+                  )
+                })}
+              </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={!selected || submitting}
-              className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-40"
-            >
-              {submitting ? 'Submitting...' : 'Submit Answer'}
-            </button>
-          </>
-        )}
+              <button
+                onClick={handleSubmit}
+                disabled={!selected || submitting}
+                className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-4 rounded-xl font-black text-lg transition disabled:opacity-40"
+              >
+                {submitting ? 'Submitting...' : 'Lock In Answer 🔒'}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

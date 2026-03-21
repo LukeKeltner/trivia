@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+const QUICK_BETS = [
+  { label: '25%', pct: 0.25 },
+  { label: '50%', pct: 0.5 },
+  { label: '75%', pct: 0.75 },
+  { label: 'All In', pct: 1 },
+]
+
 export default function Bet() {
   const { state } = useLocation()
   const navigate = useNavigate()
@@ -8,10 +15,7 @@ export default function Bet() {
   const [bet, setBet] = useState('')
   const [error, setError] = useState(null)
 
-  if (!topic) {
-    navigate('/')
-    return null
-  }
+  if (!topic) { navigate('/'); return null }
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -21,39 +25,73 @@ export default function Bet() {
     navigate('/question', { state: { topic, coins, bet: amount } })
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center gap-6 p-6">
-      <div className="bg-white rounded-xl shadow p-8 w-full max-w-sm">
-        <h2 className="text-xl font-bold text-gray-800 mb-1">{topic.name}</h2>
-        <p className="text-gray-500 text-sm mb-6">Balance: <span className="font-semibold text-yellow-500">{coins} coins</span></p>
+  function quickBet(pct) {
+    setBet(String(Math.max(1, Math.floor(coins * pct))))
+    setError(null)
+  }
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">How many coins do you want to bet?</label>
-            <input
-              type="number"
-              min="1"
-              max={coins}
-              value={bet}
-              onChange={e => { setBet(e.target.value); setError(null) }}
-              placeholder="e.g. 10"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+  return (
+    <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+
+        <button onClick={() => navigate('/')} className="text-gray-400 font-bold text-sm mb-6 hover:text-gray-600 transition">
+          ← Back
+        </button>
+
+        <div className="bg-white rounded-3xl shadow-sm p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-black text-gray-800">{topic.name}</h2>
+            <div className="flex items-center justify-center gap-1 mt-2">
+              <span className="text-lg">🪙</span>
+              <span className="text-xl font-black text-[var(--color-gold)]">{coins}</span>
+              <span className="text-gray-400 font-semibold text-sm">coins available</span>
+            </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-black text-gray-600 mb-2 uppercase tracking-wide">
+                Your Bet
+              </label>
+              <input
+                type="number"
+                min="1"
+                max={coins}
+                value={bet}
+                onChange={e => { setBet(e.target.value); setError(null) }}
+                placeholder="0"
+                className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 text-2xl font-black text-center focus:outline-none focus:border-[var(--color-primary)] transition"
+              />
+            </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"
-          >
-            Place Bet
-          </button>
-        </form>
+            {/* Quick bet buttons */}
+            <div className="grid grid-cols-4 gap-2">
+              {QUICK_BETS.map(({ label, pct }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => quickBet(pct)}
+                  className="bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-black py-2 rounded-xl hover:bg-[var(--color-primary)] hover:text-white transition"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
 
-        <button onClick={() => navigate('/')} className="mt-4 w-full text-sm text-gray-400 hover:text-gray-600">
-          Back
-        </button>
+            {error && (
+              <div className="bg-red-50 text-red-600 text-sm font-bold px-4 py-2 rounded-xl text-center">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-4 rounded-xl font-black text-lg transition"
+            >
+              Place Bet 🎲
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

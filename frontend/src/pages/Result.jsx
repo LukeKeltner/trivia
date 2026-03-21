@@ -5,45 +5,52 @@ export default function Result() {
   const navigate = useNavigate()
   const { result, bet, topic } = state ?? {}
 
-  if (!result) {
-    navigate('/')
-    return null
-  }
+  if (!result) { navigate('/'); return null }
 
   const { is_correct, coins } = result
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center gap-6 p-6">
-      <div className="bg-white rounded-xl shadow p-8 w-full max-w-sm text-center">
-        <div className="text-6xl mb-4">{is_correct ? '🎉' : '😞'}</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          {is_correct ? 'Correct!' : 'Wrong!'}
-        </h2>
-        <p className="text-gray-500 mb-6">
-          {is_correct
-            ? `You won ${bet} coins!`
-            : `You lost ${bet} coins.`}
-        </p>
+    <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm">
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <p className="text-sm text-gray-500">New Balance</p>
-          <p className="text-4xl font-bold text-yellow-500">{coins} <span className="text-xl">coins</span></p>
+        {/* Result card */}
+        <div className="bg-white rounded-3xl shadow-sm p-8 text-center">
+
+          <div className="text-7xl mb-4">{is_correct ? '🎉' : '😬'}</div>
+
+          <h2 className={`text-3xl font-black mb-1 ${is_correct ? 'text-green-600' : 'text-red-500'}`}>
+            {is_correct ? 'Correct!' : 'Wrong!'}
+          </h2>
+
+          <p className={`font-bold text-sm mb-6 ${is_correct ? 'text-green-400' : 'text-red-300'}`}>
+            {is_correct ? `+${bet} coins earned` : `-${bet} coins lost`}
+          </p>
+
+          {/* New balance */}
+          <div className="bg-[var(--color-game-bg)] rounded-2xl p-5 mb-8 border-2 border-[var(--color-primary-light)]">
+            <p className="text-gray-400 font-bold text-xs uppercase tracking-wide mb-1">New Balance</p>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-3xl">🪙</span>
+              <span className="text-4xl font-black text-[var(--color-gold)]">{coins}</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/bet', { state: { topic, coins } })}
+              className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-4 rounded-xl font-black text-lg transition"
+            >
+              Play Again 🎲
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-black transition"
+            >
+              Change Topic
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-3">
-          <button
-            onClick={() => navigate('/bet', { state: { topic, coins } })}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"
-          >
-            Play Again
-          </button>
-          <button
-            onClick={() => navigate('/')}
-            className="w-full text-sm text-gray-400 hover:text-gray-600"
-          >
-            Change Topic
-          </button>
-        </div>
       </div>
     </div>
   )
