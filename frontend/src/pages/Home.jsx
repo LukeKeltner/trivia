@@ -4,8 +4,11 @@ import { useAuth } from '../context/AuthContext'
 import { get } from '../lib/api'
 
 const TOPIC_STYLES = {
-  'Pop Culture': { emoji: '🎬', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700', hover: 'hover:bg-pink-100' },
-  'Science':     { emoji: '🔬', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', hover: 'hover:bg-blue-100' },
+  'Pop Culture': { emoji: '🎬', bg: 'bg-pink-50',   border: 'border-pink-200',   text: 'text-pink-700',   hover: 'hover:bg-pink-100' },
+  'Science':     { emoji: '🔬', bg: 'bg-blue-50',   border: 'border-blue-200',   text: 'text-blue-700',   hover: 'hover:bg-blue-100' },
+  'Video Games': { emoji: '🎮', bg: 'bg-green-50',  border: 'border-green-200',  text: 'text-green-700',  hover: 'hover:bg-green-100' },
+  'History':     { emoji: '📜', bg: 'bg-amber-50',  border: 'border-amber-200',  text: 'text-amber-700',  hover: 'hover:bg-amber-100' },
+  'Sports':      { emoji: '🏆', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', hover: 'hover:bg-orange-100' },
 }
 const DEFAULT_STYLE = { emoji: '🎯', bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', hover: 'hover:bg-gray-100' }
 
