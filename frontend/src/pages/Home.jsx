@@ -16,10 +16,14 @@ export default function Home() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [coins, setCoins] = useState(null)
+  const [toppedUp, setToppedUp] = useState(false)
   const [topics, setTopics] = useState([])
 
   useEffect(() => {
-    get(`/game/profile/${user.id}`).then(data => setCoins(data.coins))
+    get(`/game/profile/${user.id}`).then(data => {
+      setCoins(data.coins)
+      setToppedUp(data.topped_up)
+    })
     get('/topics/').then(setTopics)
   }, [user.id])
 
@@ -44,6 +48,13 @@ export default function Home() {
             Sign Out
           </button>
         </div>
+
+        {/* Top-up banner */}
+        {toppedUp && (
+          <div className="bg-amber-50 border-2 border-amber-200 text-amber-700 font-bold text-sm px-4 py-3 rounded-2xl mb-4 text-center">
+            You ran out of coins! Here's 10 to get back in the game 🪙
+          </div>
+        )}
 
         {/* Coin Balance */}
         <div className="bg-white rounded-3xl shadow-sm p-6 mb-8 text-center border-2 border-[var(--color-primary-light)]">

@@ -69,7 +69,10 @@ def get_profile(user_id: str, db: Session = Depends(get_db)):
     profile = db.query(Profile).filter(Profile.id == uuid.UUID(user_id)).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
-    return {"coins": profile.coins}
+    if profile.coins <= 0:
+        profile.coins = 10
+        db.commit()
+    return {"coins": profile.coins, "topped_up": profile.coins == 10}
 
 
 @router.get("/leaderboard")
