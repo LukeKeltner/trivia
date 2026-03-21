@@ -1,10 +1,14 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import BottomNav from './components/BottomNav'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Bet from './pages/Bet'
 import Question from './pages/Question'
 import Result from './pages/Result'
+import Leaderboard from './pages/Leaderboard'
+
+const NAV_ROUTES = ['/', '/leaderboard']
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -14,16 +18,23 @@ function ProtectedRoute({ children }) {
 
 function AppRoutes() {
   const { user, loading } = useAuth()
+  const { pathname } = useLocation()
   if (loading) return null
 
+  const showNav = user && NAV_ROUTES.includes(pathname)
+
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      <Route path="/bet" element={<ProtectedRoute><Bet /></ProtectedRoute>} />
-      <Route path="/question" element={<ProtectedRoute><Question /></ProtectedRoute>} />
-      <Route path="/result" element={<ProtectedRoute><Result /></ProtectedRoute>} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+        <Route path="/bet" element={<ProtectedRoute><Bet /></ProtectedRoute>} />
+        <Route path="/question" element={<ProtectedRoute><Question /></ProtectedRoute>} />
+        <Route path="/result" element={<ProtectedRoute><Result /></ProtectedRoute>} />
+      </Routes>
+      {showNav && <BottomNav />}
+    </>
   )
 }
 

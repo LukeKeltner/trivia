@@ -70,3 +70,12 @@ def get_profile(user_id: str, db: Session = Depends(get_db)):
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return {"coins": profile.coins}
+
+
+@router.get("/leaderboard")
+def get_leaderboard(db: Session = Depends(get_db)):
+    profiles = db.query(Profile).order_by(Profile.coins.desc()).all()
+    return [
+        {"username": p.username or "Anonymous", "coins": p.coins, "id": str(p.id)}
+        for p in profiles
+    ]
