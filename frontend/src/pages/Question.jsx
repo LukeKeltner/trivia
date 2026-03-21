@@ -22,13 +22,19 @@ export default function Question() {
   async function handleSubmit() {
     if (!selected || submitting) return
     setSubmitting(true)
-    const result = await post('/game/submit', {
-      user_id: user.id,
-      question_id: question.id,
-      chosen_answer_id: selected.id,
-      bet,
-    })
-    navigate('/result', { state: { result, bet, topic } })
+    try {
+      const result = await post('/game/submit', {
+        user_id: user.id,
+        question_id: question.id,
+        chosen_answer_id: selected.id,
+        bet,
+      })
+      navigate('/result', { state: { result, bet, topic } })
+    } catch (err) {
+      setSubmitting(false)
+      setSelected(null)
+      alert(err.message)
+    }
   }
 
   return (
