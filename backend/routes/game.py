@@ -1,0 +1,71 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from database import get_db
+from models import Answer, GameRound, Profile
+import uuid
+
+router = APIRouter(prefix="/game", tags=["game"])
+
+
+class CreateProfileRequest(BaseModel):
+    user_id: str
+
+
+class SubmitAnswerRequest(BaseModel):
+    user_id: str
+    question_id: int
+    chosen_answer_id: int
+    bet: int
+
+
+@router.post("/profile")
+def create_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
+    user_uuid = uuid.UUID(payload.user_id)
+    existing = db.query(Profile).filter(Profile.id == user_uuid).first()
+    if existing:
+        return {"coins": existing.coins}
+    profile = Profile(id=user_uuid, coins=100)
+    db.add(profile)
+    db.commit()
+    return {"coins": 100}
+
+
+@router.post("/submit")
+def submit_answer(payload: SubmitAnswerRequest, db: Session = Depends(get_db)):
+    answer = db.query(Answer).filter(Answer.id == payload.chosen_answer_id).first()
+    if not answer:
+        raise HTTPException(status_code=404, detail="Answer not found")
+
+    profile = db.query(Profile).filter(Profile.id == uuid.UUID(payload.user_id)).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="User profile not found")
+
+    if payload.bet > profile.coins:
+        raise HTTPException(status_code=400, detail="Bet exceeds coin balance")
+
+    is_correct = answer.is_correct
+    profile.coins += payload.bet if is_correct else -payload.bet
+
+    round = GameRound(
+        user_id=profile.id,
+        question_id=payload.question_id,
+        chosen_answer_id=payload.chosen_answer_id,
+        bet=payload.bet,
+        is_correct=is_correct,
+    )
+    db.add(round)
+    db.commit()
+
+    return {
+        "is_correct": is_correct,
+        "coins": profile.coins,
+    }
+
+
+@router.get("/profile/{user_id}")
+def get_profile(user_id: str, db: Session = Depends(get_db)):
+    profile = db.query(Profile).filter(Profile.id == uuid.UUID(user_id)).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {"coins": profile.coins}
