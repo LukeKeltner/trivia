@@ -10,6 +10,7 @@ router = APIRouter(prefix="/game", tags=["game"])
 
 class CreateProfileRequest(BaseModel):
     user_id: str
+    username: str
 
 
 class SubmitAnswerRequest(BaseModel):
@@ -25,7 +26,7 @@ def create_profile(payload: CreateProfileRequest, db: Session = Depends(get_db))
     existing = db.query(Profile).filter(Profile.id == user_uuid).first()
     if existing:
         return {"coins": existing.coins}
-    profile = Profile(id=user_uuid, coins=100)
+    profile = Profile(id=user_uuid, username=payload.username, coins=100)
     db.add(profile)
     db.commit()
     return {"coins": 100}

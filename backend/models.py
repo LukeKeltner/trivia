@@ -37,6 +37,7 @@ class Profile(Base):
     __tablename__ = "profiles"
 
     id = Column(UUID(as_uuid=True), primary_key=True)
+    username = Column(String, unique=True, nullable=True)
     coins = Column(Integer, nullable=False, default=100)
     game_rounds = relationship("GameRound", back_populates="user")
 
