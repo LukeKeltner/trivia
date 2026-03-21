@@ -124,6 +124,18 @@ def update_title(payload: UpdateTitleRequest, db: Session = Depends(get_db)):
     return {"title": profile.title}
 
 
+@router.post("/reset")
+def reset_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
+    user_uuid = uuid.UUID(payload.user_id)
+    profile = db.query(Profile).filter(Profile.id == user_uuid).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    db.query(GameRound).filter(GameRound.user_id == user_uuid).delete()
+    profile.coins = 100
+    db.commit()
+    return {"coins": profile.coins}
+
+
 @router.post("/avatar")
 def update_avatar(payload: UpdateAvatarRequest, db: Session = Depends(get_db)):
     profile = db.query(Profile).filter(Profile.id == uuid.UUID(payload.user_id)).first()

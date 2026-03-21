@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { get } from '../lib/api'
+import { get, post } from '../lib/api'
 
 const TOPIC_STYLES = {
   'Pop Culture': { emoji: '🎬', bg: 'bg-pink-50',   border: 'border-pink-200',   text: 'text-pink-700',   hover: 'hover:bg-pink-100' },
@@ -35,6 +35,14 @@ export default function Home() {
     })
   }, [user.id])
 
+  async function handleReset() {
+    if (!confirm('Reset your data? This will set your coins back to 100 and clear all progress.')) return
+    await post('/game/reset', { user_id: user.id, username: user.email })
+    setCoins(100)
+    setProgress({})
+    setToppedUp(false)
+  }
+
   function selectTopic(topic) {
     navigate('/bet', { state: { topic, coins } })
   }
@@ -49,12 +57,20 @@ export default function Home() {
             <h1 className="text-3xl font-black text-[var(--color-primary)]">{avatar} Trivia</h1>
             <p className="text-gray-400 font-semibold text-sm">{user?.email}</p>
           </div>
-          <button
-            onClick={signOut}
-            className="text-sm font-bold text-gray-400 hover:text-red-400 transition"
-          >
-            Sign Out
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleReset}
+              className="text-sm font-bold text-gray-400 hover:text-orange-400 transition"
+            >
+              Reset
+            </button>
+            <button
+              onClick={signOut}
+              className="text-sm font-bold text-gray-400 hover:text-red-400 transition"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
 
         {/* Top-up banner */}
