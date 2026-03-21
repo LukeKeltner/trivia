@@ -7,8 +7,9 @@ import Bet from './pages/Bet'
 import Question from './pages/Question'
 import Result from './pages/Result'
 import Leaderboard from './pages/Leaderboard'
+import Store from './pages/Store'
 
-const NAV_ROUTES = ['/', '/leaderboard']
+const NAV_ROUTES = ['/', '/leaderboard', '/store']
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="/bet" element={<ProtectedRoute><Bet /></ProtectedRoute>} />
         <Route path="/question" element={<ProtectedRoute><Question /></ProtectedRoute>} />
         <Route path="/result" element={<ProtectedRoute><Result /></ProtectedRoute>} />
+        <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
       </Routes>
       {showNav && <BottomNav />}
     </>

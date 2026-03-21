@@ -47,8 +47,9 @@ export default function Leaderboard() {
                     {MEDALS[i] ?? <span className="text-gray-400 font-black text-sm">#{i + 1}</span>}
                   </div>
 
-                  {/* Username */}
-                  <div className="flex-1 min-w-0">
+                  {/* Avatar + Username */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-xl shrink-0">{entry.avatar}</span>
                     <p className={`font-black truncate ${isMe ? 'text-[var(--color-primary)]' : 'text-gray-800'}`}>
                       {entry.username}
                       {isMe && <span className="ml-2 text-xs font-bold opacity-60">(you)</span>}

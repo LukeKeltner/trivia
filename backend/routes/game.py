@@ -20,6 +20,11 @@ class SubmitAnswerRequest(BaseModel):
     bet: int
 
 
+class UpdateAvatarRequest(BaseModel):
+    user_id: str
+    avatar: str
+
+
 @router.post("/profile")
 def create_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
     user_uuid = uuid.UUID(payload.user_id)
@@ -72,7 +77,7 @@ def get_profile(user_id: str, db: Session = Depends(get_db)):
     if profile.coins <= 0:
         profile.coins = 10
         db.commit()
-    return {"coins": profile.coins, "topped_up": profile.coins == 10}
+    return {"coins": profile.coins, "topped_up": profile.coins == 10, "avatar": profile.avatar or "🧠"}
 
 
 @router.get("/progress/{user_id}")
@@ -93,10 +98,24 @@ def get_progress(user_id: str, db: Session = Depends(get_db)):
     return result
 
 
+@router.post("/avatar")
+def update_avatar(payload: UpdateAvatarRequest, db: Session = Depends(get_db)):
+    profile = db.query(Profile).filter(Profile.id == uuid.UUID(payload.user_id)).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    cost = 0 if payload.avatar == '🧠' else 50
+    if profile.coins < cost:
+        raise HTTPException(status_code=400, detail="Not enough coins")
+    profile.coins -= cost
+    profile.avatar = payload.avatar
+    db.commit()
+    return {"avatar": profile.avatar, "coins": profile.coins}
+
+
 @router.get("/leaderboard")
 def get_leaderboard(db: Session = Depends(get_db)):
     profiles = db.query(Profile).order_by(Profile.coins.desc()).all()
     return [
-        {"username": p.username or "Anonymous", "coins": p.coins, "id": str(p.id)}
+        {"username": p.username or "Anonymous", "coins": p.coins, "id": str(p.id), "avatar": p.avatar or "🧠"}
         for p in profiles
     ]

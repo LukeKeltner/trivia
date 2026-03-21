@@ -16,6 +16,7 @@ export default function Home() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [coins, setCoins] = useState(null)
+  const [avatar, setAvatar] = useState('🧠')
   const [toppedUp, setToppedUp] = useState(false)
   const [topics, setTopics] = useState([])
   const [progress, setProgress] = useState({})
@@ -24,6 +25,7 @@ export default function Home() {
     get(`/game/profile/${user.id}`).then(data => {
       setCoins(data.coins)
       setToppedUp(data.topped_up)
+      setAvatar(data.avatar ?? '🧠')
     })
     get('/topics/').then(setTopics)
     get(`/game/progress/${user.id}`).then(data => {
@@ -44,7 +46,7 @@ export default function Home() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-black text-[var(--color-primary)]">🧠 Trivia</h1>
+            <h1 className="text-3xl font-black text-[var(--color-primary)]">{avatar} Trivia</h1>
             <p className="text-gray-400 font-semibold text-sm">{user?.email}</p>
           </div>
           <button

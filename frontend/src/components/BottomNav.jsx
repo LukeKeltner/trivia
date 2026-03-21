@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 const TABS = [
   { label: 'Play', emoji: '🧠', path: '/' },
   { label: 'Leaderboard', emoji: '🏆', path: '/leaderboard' },
+  { label: 'Store', emoji: '🛒', path: '/store' },
 ]
 
 export default function BottomNav() {
