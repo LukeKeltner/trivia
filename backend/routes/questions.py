@@ -15,18 +15,29 @@ def get_random_question(topic_id: int, user_id: str, db: Session = Depends(get_d
         GameRound.is_correct == True,
     ).subquery()
 
-    questions = db.query(Question).filter(
+    available = db.query(Question).filter(
         Question.topic_id == topic_id,
         Question.id.notin_(answered_correctly),
     ).all()
 
-    if not questions:
+    if not available:
         raise HTTPException(status_code=404, detail="NO_QUESTIONS_LEFT")
 
-    question = random.choice(questions)
+    easy = [q for q in available if q.difficulty == 'easy']
+    hard = [q for q in available if q.difficulty == 'hard']
+
+    if easy and hard:
+        pool = hard if random.random() < 0.3 else easy
+    elif hard:
+        pool = hard
+    else:
+        pool = easy
+
+    question = random.choice(pool)
     return {
         "id": question.id,
         "question_text": question.question_text,
+        "difficulty": question.difficulty,
         "answers": [
             {"id": a.id, "answer_text": a.answer_text}
             for a in question.answers

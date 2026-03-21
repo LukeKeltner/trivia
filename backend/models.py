@@ -19,6 +19,7 @@ class Question(Base):
     id = Column(Integer, primary_key=True)
     topic_id = Column(Integer, ForeignKey("topics.id"))
     question_text = Column(String, nullable=False)
+    difficulty = Column(String, nullable=False, server_default='easy')
     topic = relationship("Topic", back_populates="questions")
     answers = relationship("Answer", back_populates="question")
 
@@ -40,6 +41,7 @@ class Profile(Base):
     username = Column(String, unique=True, nullable=True)
     coins = Column(Integer, nullable=False, default=100)
     avatar = Column(String, nullable=False, server_default='🧠')
+    title = Column(String, nullable=True)
     game_rounds = relationship("GameRound", back_populates="user")
 
 

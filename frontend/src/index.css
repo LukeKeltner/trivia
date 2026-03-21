@@ -14,3 +14,12 @@
     font-family: "Nunito", system-ui, sans-serif;
   }
 }
+
+@keyframes hard-pulse {
+  0%, 100% { background-color: var(--color-game-bg); }
+  50% { background-color: #fecaca; }
+}
+
+.hard-question-bg {
+  animation: hard-pulse 2s ease-in-out infinite;
+}

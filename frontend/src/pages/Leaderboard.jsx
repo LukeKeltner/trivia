@@ -50,10 +50,17 @@ export default function Leaderboard() {
                   {/* Avatar + Username */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <span className="text-xl shrink-0">{entry.avatar}</span>
-                    <p className={`font-black truncate ${isMe ? 'text-[var(--color-primary)]' : 'text-gray-800'}`}>
-                      {entry.username}
-                      {isMe && <span className="ml-2 text-xs font-bold opacity-60">(you)</span>}
-                    </p>
+                    <div className="min-w-0">
+                      <p className={`font-black truncate ${isMe ? 'text-[var(--color-primary)]' : 'text-gray-800'}`}>
+                        {entry.username}
+                        {isMe && <span className="ml-2 text-xs font-bold opacity-60">(you)</span>}
+                      </p>
+                      {entry.title && (
+                        <p className={`text-xs font-bold truncate ${isMe ? 'text-[var(--color-primary)] opacity-70' : 'text-gray-400'}`}>
+                          {entry.title}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Coins */}

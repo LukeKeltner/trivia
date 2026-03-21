@@ -7,7 +7,8 @@ export default function Result() {
 
   if (!result) { navigate('/'); return null }
 
-  const { is_correct, coins } = result
+  const { is_correct, coins, winnings, multiplier } = result
+  const speedBonus = is_correct && multiplier >= 1.0
 
   return (
     <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center justify-center p-6">
@@ -22,9 +23,16 @@ export default function Result() {
             {is_correct ? 'Correct!' : 'Wrong!'}
           </h2>
 
-          <p className={`font-bold text-sm mb-6 ${is_correct ? 'text-green-400' : 'text-red-300'}`}>
-            {is_correct ? `+${bet} coins earned` : `-${bet} coins lost`}
+          <p className={`font-bold text-sm mb-1 ${is_correct ? 'text-green-400' : 'text-red-300'}`}>
+            {is_correct ? `+${winnings} coins earned` : `-${bet} coins lost`}
           </p>
+
+          {is_correct && !speedBonus && (
+            <p className="text-xs font-bold text-orange-400 mb-6">
+              {Math.round(multiplier * 100)}% multiplier — answer faster for full winnings!
+            </p>
+          )}
+          {(!is_correct || speedBonus) && <div className="mb-6" />}
 
           {/* New balance */}
           <div className="bg-[var(--color-game-bg)] rounded-2xl p-5 mb-8 border-2 border-[var(--color-primary-light)]">

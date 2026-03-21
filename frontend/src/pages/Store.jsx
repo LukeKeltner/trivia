@@ -25,20 +25,54 @@ const AVATARS = [
   { emoji: '🌈', label: 'Rainbow', cost: 50 },
 ]
 
+const TOPIC_TITLES = {
+  'Pop Culture': 'Pop Culture Pro',
+  'Science': 'Science Whiz',
+  'Video Games': 'Game Guru',
+  'History': 'History Buff',
+  'Sports': 'Sports Fanatic',
+}
+const ALL_TOPICS_TITLE = 'Trivia Master'
+
 export default function Store() {
   const { user } = useAuth()
   const [coins, setCoins] = useState(null)
   const [avatar, setAvatar] = useState(null)
+  const [title, setTitle] = useState(null)
   const [selected, setSelected] = useState(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
+  const [topics, setTopics] = useState([])
+  const [progress, setProgress] = useState({})
+  const [selectedTitle, setSelectedTitle] = useState(null)
+  const [titleLoading, setTitleLoading] = useState(false)
 
   useEffect(() => {
     get(`/game/profile/${user.id}`).then(data => {
       setCoins(data.coins)
       setAvatar(data.avatar)
+      setTitle(data.title ?? null)
+    })
+    get('/topics/').then(setTopics)
+    get(`/game/progress/${user.id}`).then(data => {
+      const map = {}
+      data.forEach(p => { map[p.topic_id] = p })
+      setProgress(map)
     })
   }, [user.id])
+
+  async function handleEquipTitle(t) {
+    setTitleLoading(true)
+    try {
+      const data = await post('/game/title', { user_id: user.id, title: t === title ? null : t })
+      setTitle(data.title)
+      setSelectedTitle(null)
+      setMessage({ type: 'success', text: data.title ? `Title "${data.title}" equipped!` : 'Title removed.' })
+    } catch {
+      setMessage({ type: 'error', text: 'Something went wrong.' })
+    }
+    setTitleLoading(false)
+  }
 
   async function handleConfirm() {
     if (!selected || selected.emoji === avatar) return
@@ -116,6 +150,58 @@ export default function Store() {
             </div>
           </div>
         )}
+
+        {/* Titles section */}
+        {(() => {
+          const completedTopics = topics.filter(t => {
+            const p = progress[t.id]
+            return p && p.completed === p.total && p.total > 0
+          })
+          const allDone = completedTopics.length === topics.length && topics.length > 0
+          const availableTitles = [
+            ...completedTopics.map(t => TOPIC_TITLES[t.name]).filter(Boolean),
+            ...(allDone ? [ALL_TOPICS_TITLE] : []),
+          ]
+
+          if (availableTitles.length === 0) return null
+
+          return (
+            <div className="mb-6">
+              <h2 className="text-lg font-black text-gray-700 mb-1">Titles</h2>
+              <p className="text-xs text-gray-400 font-bold mb-3">Earned by completing topics. Free to equip.</p>
+              {title && (
+                <div className="bg-[var(--color-primary-light)] border-2 border-[var(--color-primary)] rounded-2xl px-4 py-3 mb-3 text-center">
+                  <p className="text-xs text-[var(--color-primary)] font-bold uppercase tracking-wide mb-1">Current Title</p>
+                  <p className="font-black text-[var(--color-primary)]">{title}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                {availableTitles.map(t => {
+                  const isCurrent = t === title
+                  const isPending = selectedTitle === t
+                  return (
+                    <div key={t} className={`flex items-center justify-between px-4 py-3 rounded-2xl border-2 transition ${
+                      isCurrent ? 'bg-[var(--color-primary-light)] border-[var(--color-primary)]' : 'bg-white border-gray-100'
+                    }`}>
+                      <p className={`font-black ${isCurrent ? 'text-[var(--color-primary)]' : 'text-gray-700'}`}>{t}</p>
+                      <button
+                        onClick={() => { setMessage(null); handleEquipTitle(t) }}
+                        disabled={titleLoading}
+                        className={`text-sm font-black px-3 py-1.5 rounded-xl transition disabled:opacity-40 ${
+                          isCurrent
+                            ? 'bg-white text-[var(--color-primary)] border-2 border-[var(--color-primary)]'
+                            : 'bg-[var(--color-primary)] text-white'
+                        }`}
+                      >
+                        {titleLoading && isPending ? '...' : isCurrent ? 'Remove' : 'Equip'}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Avatar grid */}
         <h2 className="text-lg font-black text-gray-700 mb-3">Choose Your Avatar</h2>
