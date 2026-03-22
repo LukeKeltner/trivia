@@ -22,7 +22,13 @@ export default function Question() {
   const [selected, setSelected] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [elapsed, setElapsed] = useState(0)
-  const startTime = useRef(Date.now())
+  const storageKey = question ? `q_start_${question.id}` : null
+  const startTime = useRef(null)
+  if (startTime.current === null && storageKey) {
+    const stored = sessionStorage.getItem(storageKey)
+    startTime.current = stored ? Number(stored) : Date.now()
+    if (!stored) sessionStorage.setItem(storageKey, startTime.current)
+  }
 
   useEffect(() => {
     if (!topic || !question) { navigate('/'); return }
@@ -49,6 +55,7 @@ export default function Question() {
         bet,
         elapsed_seconds: elapsed,
       })
+      sessionStorage.removeItem(storageKey)
       navigate('/result', { state: { result, bet, topic, elapsed } })
     } catch (err) {
       setSubmitting(false)
