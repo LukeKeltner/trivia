@@ -55,8 +55,15 @@ export default function Store() {
     })
     get('/topics/').then(setTopics)
     get(`/game/progress/${user.id}`).then(data => {
+      // Aggregate subtopic progress by topic
       const map = {}
-      data.forEach(p => { map[p.topic_id] = p })
+      data.forEach(p => {
+        if (!map[p.topic_id]) map[p.topic_id] = { subtopicsWithQuestions: 0, subtopicsDone: 0 }
+        if (p.total > 0) {
+          map[p.topic_id].subtopicsWithQuestions += 1
+          if (p.completed === p.total) map[p.topic_id].subtopicsDone += 1
+        }
+      })
       setProgress(map)
     })
   }, [user.id])
@@ -155,7 +162,7 @@ export default function Store() {
         {(() => {
           const completedTopics = topics.filter(t => {
             const p = progress[t.id]
-            return p && p.completed === p.total && p.total > 0
+            return p && p.subtopicsWithQuestions > 0 && p.subtopicsDone === p.subtopicsWithQuestions
           })
           const allDone = completedTopics.length === topics.length && topics.length > 0
           const availableTitles = [

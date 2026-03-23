@@ -18,7 +18,7 @@ export default function Question() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { topic, coins, bet, question } = state ?? {}
+  const { subtopic, topic, coins, bet, question } = state ?? {}
   const [selected, setSelected] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [elapsed, setElapsed] = useState(0)
@@ -56,7 +56,7 @@ export default function Question() {
         elapsed_seconds: elapsed,
       })
       sessionStorage.removeItem(storageKey)
-      navigate('/result', { state: { result, bet, topic, elapsed } })
+      navigate('/result', { state: { result, bet, subtopic, topic, elapsed } })
     } catch (err) {
       setSubmitting(false)
       setSelected(null)

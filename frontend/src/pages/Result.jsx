@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 export default function Result() {
   const { state } = useLocation()
   const navigate = useNavigate()
-  const { result, bet, topic } = state ?? {}
+  const { result, bet, subtopic, topic } = state ?? {}
 
   if (!result) { navigate('/'); return null }
 
@@ -45,7 +45,7 @@ export default function Result() {
 
           <div className="space-y-3">
             <button
-              onClick={() => navigate('/bet', { state: { topic, coins } })}
+              onClick={() => navigate('/bet', { state: { subtopic, topic, coins } })}
               className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-4 rounded-xl font-black text-lg transition"
             >
               Play Again 🎲

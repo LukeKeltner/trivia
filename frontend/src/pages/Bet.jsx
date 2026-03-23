@@ -14,12 +14,12 @@ export default function Bet() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { topic, coins } = state ?? {}
+  const { subtopic, topic, coins } = state ?? {}
   const [bet, setBet] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  if (!topic) { navigate('/'); return null }
+  if (!subtopic || !topic) { navigate('/'); return null }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -28,13 +28,13 @@ export default function Bet() {
     if (amount > coins) return setError("You don't have enough coins.")
     setLoading(true)
     try {
-      const question = await get(`/questions/random?topic_id=${topic.id}&user_id=${user.id}`)
+      const question = await get(`/questions/random?subtopic_id=${subtopic.id}&user_id=${user.id}`)
       question.answers = question.answers.sort(() => Math.random() - 0.5)
-      navigate('/question', { state: { topic, coins, bet: amount, question } })
+      navigate('/question', { state: { subtopic, topic, coins, bet: amount, question } })
     } catch (err) {
       const body = JSON.parse(err.message)
       if (body?.detail === 'NO_QUESTIONS_LEFT') {
-        setError("You've answered all questions in this topic correctly! Try another topic.")
+        setError("You've answered all questions here! Try another subtopic.")
       } else {
         setError('Failed to load question. Try again.')
       }
@@ -51,13 +51,14 @@ export default function Bet() {
     <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
 
-        <button onClick={() => navigate('/')} className="text-gray-400 font-bold text-sm mb-6 hover:text-gray-600 transition">
+        <button onClick={() => navigate('/subtopics', { state: { topic, coins } })} className="text-gray-400 font-bold text-sm mb-6 hover:text-gray-600 transition">
           ← Back
         </button>
 
         <div className="bg-white rounded-3xl shadow-sm p-8">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-black text-gray-800">{topic.name}</h2>
+            <p className="text-sm font-bold text-gray-400 mb-1">{topic.name}</p>
+            <h2 className="text-2xl font-black text-gray-800">{subtopic.name}</h2>
             <div className="flex items-center justify-center gap-1 mt-2">
               <span className="text-lg">🪙</span>
               <span className="text-xl font-black text-[var(--color-gold)]">{coins}</span>

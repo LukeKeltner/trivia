@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import get_db
-from models import Answer, GameRound, Profile, Question, Topic
+from models import Answer, GameRound, Profile, Question, Subtopic, Topic
 import uuid
 
 router = APIRouter(prefix="/game", tags=["game"])
@@ -99,18 +99,24 @@ def get_profile(user_id: str, db: Session = Depends(get_db)):
 @router.get("/progress/{user_id}")
 def get_progress(user_id: str, db: Session = Depends(get_db)):
     user_uuid = uuid.UUID(user_id)
-    topics = db.query(Topic).all()
+    subtopics = db.query(Subtopic).all()
     result = []
-    for topic in topics:
-        total = db.query(Question).filter(Question.topic_id == topic.id).count()
+    for subtopic in subtopics:
+        total = db.query(Question).filter(Question.subtopic_id == subtopic.id).count()
         completed = db.query(GameRound.question_id).filter(
             GameRound.user_id == user_uuid,
             GameRound.is_correct == True,
             GameRound.question_id.in_(
-                db.query(Question.id).filter(Question.topic_id == topic.id)
+                db.query(Question.id).filter(Question.subtopic_id == subtopic.id)
             ),
         ).distinct().count()
-        result.append({"topic_id": topic.id, "total": total, "completed": completed})
+        result.append({
+            "subtopic_id": subtopic.id,
+            "topic_id": subtopic.topic_id,
+            "subtopic_name": subtopic.name,
+            "total": total,
+            "completed": completed,
+        })
     return result
 
 

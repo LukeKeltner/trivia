@@ -9,14 +9,14 @@ router = APIRouter(prefix="/questions", tags=["questions"])
 
 
 @router.get("/random")
-def get_random_question(topic_id: int, user_id: str, db: Session = Depends(get_db)):
+def get_random_question(subtopic_id: int, user_id: str, db: Session = Depends(get_db)):
     answered_correctly = db.query(GameRound.question_id).filter(
         GameRound.user_id == uuid.UUID(user_id),
         GameRound.is_correct == True,
     ).subquery()
 
     available = db.query(Question).filter(
-        Question.topic_id == topic_id,
+        Question.subtopic_id == subtopic_id,
         Question.id.notin_(answered_correctly),
     ).all()
 

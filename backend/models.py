@@ -10,17 +10,27 @@ class Topic(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    questions = relationship("Question", back_populates="topic")
+    subtopics = relationship("Subtopic", back_populates="topic")
+
+
+class Subtopic(Base):
+    __tablename__ = "subtopics"
+
+    id = Column(Integer, primary_key=True)
+    topic_id = Column(Integer, ForeignKey("topics.id"))
+    name = Column(String, nullable=False)
+    topic = relationship("Topic", back_populates="subtopics")
+    questions = relationship("Question", back_populates="subtopic")
 
 
 class Question(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True)
-    topic_id = Column(Integer, ForeignKey("topics.id"))
+    subtopic_id = Column(Integer, ForeignKey("subtopics.id"))
     question_text = Column(String, nullable=False)
     difficulty = Column(String, nullable=False, server_default='easy')
-    topic = relationship("Topic", back_populates="questions")
+    subtopic = relationship("Subtopic", back_populates="questions")
     answers = relationship("Answer", back_populates="question")
 
 

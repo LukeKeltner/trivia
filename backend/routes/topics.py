@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Topic
+from models import Subtopic, Topic
 
 router = APIRouter(prefix="/topics", tags=["topics"])
 
@@ -10,3 +10,9 @@ router = APIRouter(prefix="/topics", tags=["topics"])
 def get_topics(db: Session = Depends(get_db)):
     topics = db.query(Topic).all()
     return [{"id": t.id, "name": t.name} for t in topics]
+
+
+@router.get("/{topic_id}/subtopics")
+def get_subtopics(topic_id: int, db: Session = Depends(get_db)):
+    subtopics = db.query(Subtopic).filter(Subtopic.topic_id == topic_id).all()
+    return [{"id": s.id, "name": s.name, "topic_id": s.topic_id} for s in subtopics]
