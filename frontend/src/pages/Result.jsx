@@ -24,7 +24,7 @@ export default function Result() {
           </h2>
 
           <p className={`font-bold text-sm mb-1 ${is_correct ? 'text-green-400' : 'text-red-300'}`}>
-            {is_correct ? `+${winnings} coins earned` : `-${bet} coins lost`}
+            {is_correct ? `+${winnings.toLocaleString()} coins earned` : `-${bet.toLocaleString()} coins lost`}
           </p>
 
           {is_correct && !speedBonus && (
@@ -39,7 +39,7 @@ export default function Result() {
             <p className="text-gray-400 font-bold text-xs uppercase tracking-wide mb-1">New Balance</p>
             <div className="flex items-center justify-center gap-2">
               <span className="text-3xl">🪙</span>
-              <span className="text-4xl font-black text-[var(--color-gold)]">{coins}</span>
+              <span className="text-4xl font-black text-[var(--color-gold)]">{coins.toLocaleString()}</span>
             </div>
           </div>
 

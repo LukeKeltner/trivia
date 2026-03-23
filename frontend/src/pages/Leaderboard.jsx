@@ -67,7 +67,7 @@ export default function Leaderboard() {
                   <div className="flex items-center gap-1 shrink-0">
                     <span className="text-lg">🪙</span>
                     <span className={`font-black text-lg ${isMe ? 'text-[var(--color-primary)]' : 'text-[var(--color-gold)]'}`}>
-                      {entry.coins}
+                      {entry.coins.toLocaleString()}
                     </span>
                   </div>
                 </div>

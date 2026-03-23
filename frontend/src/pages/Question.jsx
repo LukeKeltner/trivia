@@ -81,7 +81,7 @@ export default function Question() {
             )}
           </div>
           <span className="bg-[var(--color-gold-light)] text-[var(--color-gold)] font-black text-sm px-4 py-2 rounded-full">
-            🪙 {bet} on the line
+            🪙 {bet?.toLocaleString()} on the line
           </span>
         </div>
 
@@ -89,7 +89,7 @@ export default function Question() {
         <div className="flex justify-between items-center mb-4 bg-white rounded-2xl px-4 py-2 border-2 border-gray-100">
           <span className="text-gray-400 font-black text-sm">⏱ {elapsed.toFixed(1)}s</span>
           <span className={`font-black text-sm px-3 py-1 rounded-xl border-2 ${MultiplierColor(multiplier)}`}>
-            Win: {Math.round(multiplier * 100)}% · 🪙 {effectiveWin}
+            Win: {Math.round(multiplier * 100)}% · 🪙 {effectiveWin.toLocaleString()}
           </span>
         </div>
 

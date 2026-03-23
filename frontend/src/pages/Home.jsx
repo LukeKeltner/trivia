@@ -91,7 +91,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 bg-[var(--color-gold-light)] px-3 py-1.5 rounded-xl">
               <span>🪙</span>
-              <span className="font-black text-lg text-[var(--color-gold)]">{coins ?? '...'}</span>
+              <span className="font-black text-lg text-[var(--color-gold)]">{coins?.toLocaleString() ?? '...'}</span>
             </div>
             <button onClick={handleReset} className="text-sm font-bold text-gray-400 hover:text-orange-400 transition">Reset</button>
             <button onClick={signOut} className="text-sm font-bold text-gray-400 hover:text-red-400 transition">Sign Out</button>

@@ -107,7 +107,7 @@ export default function Store() {
           <h1 className="text-3xl font-black text-[var(--color-primary)]">🛒 Store</h1>
           <div className="flex items-center gap-1">
             <span>🪙</span>
-            <span className="font-black text-[var(--color-gold)]">{coins ?? '...'}</span>
+            <span className="font-black text-[var(--color-gold)]">{coins?.toLocaleString() ?? '...'}</span>
           </div>
         </div>
 

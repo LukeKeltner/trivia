@@ -61,7 +61,7 @@ export default function Bet() {
             <h2 className="text-2xl font-black text-gray-800">{subtopic.name}</h2>
             <div className="flex items-center justify-center gap-1 mt-2">
               <span className="text-lg">🪙</span>
-              <span className="text-xl font-black text-[var(--color-gold)]">{coins}</span>
+              <span className="text-xl font-black text-[var(--color-gold)]">{coins?.toLocaleString()}</span>
               <span className="text-gray-400 font-semibold text-sm">coins available</span>
             </div>
           </div>
