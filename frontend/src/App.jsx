@@ -8,7 +8,6 @@ import Question from './pages/Question'
 import Result from './pages/Result'
 import Leaderboard from './pages/Leaderboard'
 import Store from './pages/Store'
-import Subtopics from './pages/Subtopics'
 
 const NAV_ROUTES = ['/', '/leaderboard', '/store']
 
@@ -31,8 +30,7 @@ function AppRoutes() {
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-        <Route path="/subtopics" element={<ProtectedRoute><Subtopics /></ProtectedRoute>} />
-        <Route path="/bet" element={<ProtectedRoute><Bet /></ProtectedRoute>} />
+<Route path="/bet" element={<ProtectedRoute><Bet /></ProtectedRoute>} />
         <Route path="/question" element={<ProtectedRoute><Question /></ProtectedRoute>} />
         <Route path="/result" element={<ProtectedRoute><Result /></ProtectedRoute>} />
         <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />

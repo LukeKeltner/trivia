@@ -12,6 +12,12 @@ def get_topics(db: Session = Depends(get_db)):
     return [{"id": t.id, "name": t.name} for t in topics]
 
 
+@router.get("/all-subtopics")
+def get_all_subtopics(db: Session = Depends(get_db)):
+    subtopics = db.query(Subtopic).all()
+    return [{"id": s.id, "name": s.name, "topic_id": s.topic_id} for s in subtopics]
+
+
 @router.get("/{topic_id}/subtopics")
 def get_subtopics(topic_id: int, db: Session = Depends(get_db)):
     subtopics = db.query(Subtopic).filter(Subtopic.topic_id == topic_id).all()

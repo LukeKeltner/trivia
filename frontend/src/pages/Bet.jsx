@@ -51,7 +51,7 @@ export default function Bet() {
     <div className="min-h-screen bg-[var(--color-game-bg)] flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
 
-        <button onClick={() => navigate('/subtopics', { state: { topic, coins } })} className="text-gray-400 font-bold text-sm mb-6 hover:text-gray-600 transition">
+        <button onClick={() => navigate('/')} className="text-gray-400 font-bold text-sm mb-6 hover:text-gray-600 transition">
           ← Back
         </button>
 
