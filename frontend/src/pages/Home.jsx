@@ -38,7 +38,7 @@ export default function Home() {
         map[s.topic_id].push(s)
       })
       setAllSubtopics(map)
-    })
+    }).catch(() => {}) // non-fatal — will fetch on click if this fails
     get(`/game/progress/${user.id}`).then(data => {
       const tMap = {}
       const sMap = {}
@@ -64,6 +64,15 @@ export default function Home() {
     setTopicProgress({})
     setSubtopicProgress({})
     setToppedUp(false)
+  }
+
+  function handleTopicSelect(topic) {
+    setSelectedTopic(topic)
+    if (!allSubtopics[topic.id]) {
+      get(`/topics/${topic.id}/subtopics`).then(data => {
+        setAllSubtopics(prev => ({ ...prev, [topic.id]: data }))
+      })
+    }
   }
 
   const style = selectedTopic ? (TOPIC_STYLES[selectedTopic.name] ?? DEFAULT_STYLE) : null
@@ -113,7 +122,7 @@ export default function Home() {
                 return (
                   <button
                     key={topic.id}
-                    onClick={() => !done && setSelectedTopic(topic)}
+                    onClick={() => !done && handleTopicSelect(topic)}
                     disabled={done}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border-2 text-left transition ${
                       done
