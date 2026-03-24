@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { get, post } from '../lib/api'
+import { THEMES, applyTheme } from '../lib/theme'
 
 const AVATARS = [
   { emoji: '🧠', label: 'Brain', cost: 0 },
@@ -39,6 +40,8 @@ export default function Store() {
   const [coins, setCoins] = useState(null)
   const [avatar, setAvatar] = useState(null)
   const [title, setTitle] = useState(null)
+  const [theme, setTheme] = useState('purple')
+  const [themeLoading, setThemeLoading] = useState(false)
   const [selected, setSelected] = useState(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
@@ -52,6 +55,7 @@ export default function Store() {
       setCoins(data.coins)
       setAvatar(data.avatar)
       setTitle(data.title ?? null)
+      setTheme(data.theme ?? 'purple')
     })
     get('/topics/').then(setTopics)
     get(`/game/progress/${user.id}`).then(data => {
@@ -67,6 +71,23 @@ export default function Store() {
       setProgress(map)
     })
   }, [user.id])
+
+  async function handleEquipTheme(t) {
+    if (t.id === theme) return
+    setThemeLoading(true)
+    applyTheme(t.id) // apply instantly for live preview
+    try {
+      const data = await post('/game/theme', { user_id: user.id, theme: t.id })
+      setTheme(data.theme)
+      setCoins(data.coins)
+      setMessage({ type: 'success', text: `${t.emoji} ${t.name} theme equipped!` })
+    } catch (err) {
+      applyTheme(theme) // revert on failure
+      const body = JSON.parse(err.message)
+      setMessage({ type: 'error', text: body?.detail ?? 'Something went wrong.' })
+    }
+    setThemeLoading(false)
+  }
 
   async function handleEquipTitle(t) {
     setTitleLoading(true)
@@ -157,6 +178,38 @@ export default function Store() {
             </div>
           </div>
         )}
+
+        {/* Theme section */}
+        <div className="mb-6">
+          <h2 className="text-lg font-black text-gray-700 mb-1">Color Theme</h2>
+          <p className="text-xs text-gray-400 font-bold mb-3">Changes your app colors. Purple is free, others cost 150 🪙</p>
+          <div className="grid grid-cols-3 gap-3">
+            {THEMES.map(t => {
+              const isCurrent = t.id === theme
+              const cantAfford = t.cost > 0 && coins !== null && coins < t.cost && !isCurrent
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => !cantAfford && !themeLoading && handleEquipTheme(t)}
+                  disabled={isCurrent || cantAfford || themeLoading}
+                  className={`rounded-2xl p-3 flex flex-col items-center gap-2 border-2 transition ${
+                    isCurrent
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]'
+                      : cantAfford
+                      ? 'border-gray-100 bg-gray-50 opacity-40'
+                      : 'border-gray-100 bg-white hover:border-gray-300 cursor-pointer'
+                  }`}
+                >
+                  <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: t.primary }} />
+                  <span className="text-xs font-black text-gray-600">{t.name}</span>
+                  <span className="text-xs font-bold text-gray-400">
+                    {isCurrent ? '✓ On' : t.cost === 0 ? 'Free' : `${t.cost}🪙`}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         {/* Titles section */}
         {(() => {

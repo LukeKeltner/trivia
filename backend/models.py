@@ -52,6 +52,7 @@ class Profile(Base):
     coins = Column(Integer, nullable=False, default=100)
     avatar = Column(String, nullable=False, server_default='🧠')
     title = Column(String, nullable=True)
+    theme = Column(String, nullable=False, server_default='purple')
     game_rounds = relationship("GameRound", back_populates="user")
 
 

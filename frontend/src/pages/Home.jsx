@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { get, post } from '../lib/api'
+import { applyTheme } from '../lib/theme'
 
 const TOPIC_STYLES = {
   'Pop Culture': { emoji: '🎬', bg: 'bg-pink-50',   border: 'border-pink-200',   text: 'text-pink-700',   bar: '#ec4899' },
@@ -29,6 +30,7 @@ export default function Home() {
       setCoins(data.coins)
       setToppedUp(data.topped_up)
       setAvatar(data.avatar ?? '🧠')
+      if (data.theme) applyTheme(data.theme)
     })
     get('/topics/').then(setTopics)
     get('/topics/all-subtopics').then(data => {

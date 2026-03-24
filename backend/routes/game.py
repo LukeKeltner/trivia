@@ -31,6 +31,11 @@ class UpdateTitleRequest(BaseModel):
     title: str | None
 
 
+class UpdateThemeRequest(BaseModel):
+    user_id: str
+    theme: str
+
+
 @router.post("/profile")
 def create_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
     user_uuid = uuid.UUID(payload.user_id)
@@ -93,7 +98,7 @@ def get_profile(user_id: str, db: Session = Depends(get_db)):
     if profile.coins <= 0:
         profile.coins = 10
         db.commit()
-    return {"coins": profile.coins, "topped_up": profile.coins == 10, "avatar": profile.avatar or "🧠", "title": profile.title}
+    return {"coins": profile.coins, "topped_up": profile.coins == 10, "avatar": profile.avatar or "🧠", "title": profile.title, "theme": profile.theme or "purple"}
 
 
 @router.get("/progress/{user_id}")
@@ -140,6 +145,20 @@ def reset_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
     profile.coins = 100
     db.commit()
     return {"coins": profile.coins}
+
+
+@router.post("/theme")
+def update_theme(payload: UpdateThemeRequest, db: Session = Depends(get_db)):
+    profile = db.query(Profile).filter(Profile.id == uuid.UUID(payload.user_id)).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    cost = 0 if payload.theme == 'purple' else 150
+    if profile.coins < cost:
+        raise HTTPException(status_code=400, detail="Not enough coins")
+    profile.coins -= cost
+    profile.theme = payload.theme
+    db.commit()
+    return {"theme": profile.theme, "coins": profile.coins}
 
 
 @router.post("/avatar")
