@@ -41,6 +41,7 @@ export default function Store() {
   const [avatar, setAvatar] = useState(null)
   const [title, setTitle] = useState(null)
   const [theme, setTheme] = useState('purple')
+  const [pendingTheme, setPendingTheme] = useState(null)
   const [themeLoading, setThemeLoading] = useState(false)
   const [selected, setSelected] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -72,17 +73,30 @@ export default function Store() {
     })
   }, [user.id])
 
-  async function handleEquipTheme(t) {
+  function selectTheme(t) {
     if (t.id === theme) return
+    setMessage(null)
+    setPendingTheme(t)
+    applyTheme(t.id) // live preview
+  }
+
+  function cancelTheme() {
+    applyTheme(theme) // revert preview
+    setPendingTheme(null)
+  }
+
+  async function confirmTheme() {
+    if (!pendingTheme) return
     setThemeLoading(true)
-    applyTheme(t.id) // apply instantly for live preview
     try {
-      const data = await post('/game/theme', { user_id: user.id, theme: t.id })
+      const data = await post('/game/theme', { user_id: user.id, theme: pendingTheme.id })
       setTheme(data.theme)
       setCoins(data.coins)
-      setMessage({ type: 'success', text: `${t.emoji} ${t.name} theme equipped!` })
+      setPendingTheme(null)
+      setMessage({ type: 'success', text: `${pendingTheme.emoji} ${pendingTheme.name} theme equipped!` })
     } catch (err) {
       applyTheme(theme) // revert on failure
+      setPendingTheme(null)
       const body = JSON.parse(err.message)
       setMessage({ type: 'error', text: body?.detail ?? 'Something went wrong.' })
     }
@@ -183,18 +197,51 @@ export default function Store() {
         <div className="mb-6">
           <h2 className="text-lg font-black text-gray-700 mb-1">Color Theme</h2>
           <p className="text-xs text-gray-400 font-bold mb-3">Changes your app colors. Purple is free, others cost 150 🪙</p>
+
+          {/* Theme confirm banner */}
+          {pendingTheme && (
+            <div className="bg-[var(--color-primary-light)] border-2 border-[var(--color-primary)] rounded-2xl p-4 mb-4 flex items-center justify-between">
+              <div>
+                <p className="font-black text-[var(--color-primary)]">
+                  {pendingTheme.emoji} {pendingTheme.name}
+                </p>
+                <p className="text-sm font-bold text-[var(--color-primary)] opacity-70">
+                  {pendingTheme.cost === 0 ? 'Free' : `Costs ${pendingTheme.cost} 🪙`}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={cancelTheme}
+                  className="bg-white text-gray-500 font-black text-sm px-3 py-2 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmTheme}
+                  disabled={themeLoading}
+                  className="bg-[var(--color-primary)] text-white font-black text-sm px-3 py-2 rounded-xl disabled:opacity-40"
+                >
+                  {themeLoading ? '...' : 'Equip'}
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-3">
             {THEMES.map(t => {
               const isCurrent = t.id === theme
+              const isPending = pendingTheme?.id === t.id
               const cantAfford = t.cost > 0 && coins !== null && coins < t.cost && !isCurrent
               return (
                 <button
                   key={t.id}
-                  onClick={() => !cantAfford && !themeLoading && handleEquipTheme(t)}
-                  disabled={isCurrent || cantAfford || themeLoading}
+                  onClick={() => !cantAfford && !isCurrent && selectTheme(t)}
+                  disabled={isCurrent || cantAfford}
                   className={`rounded-2xl p-3 flex flex-col items-center gap-2 border-2 transition ${
                     isCurrent
                       ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]'
+                      : isPending
+                      ? 'border-gray-400 bg-gray-100'
                       : cantAfford
                       ? 'border-gray-100 bg-gray-50 opacity-40'
                       : 'border-gray-100 bg-white hover:border-gray-300 cursor-pointer'
@@ -203,7 +250,7 @@ export default function Store() {
                   <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: t.primary }} />
                   <span className="text-xs font-black text-gray-600">{t.name}</span>
                   <span className="text-xs font-bold text-gray-400">
-                    {isCurrent ? '✓ On' : t.cost === 0 ? 'Free' : `${t.cost}🪙`}
+                    {isCurrent ? '✓ On' : isPending ? 'Selected' : t.cost === 0 ? 'Free' : `${t.cost}🪙`}
                   </span>
                 </button>
               )
