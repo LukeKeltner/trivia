@@ -23,9 +23,13 @@ export default function Login() {
       if (!username.trim()) { setError('Please choose a username.'); setLoading(false); return }
       const { data, error } = await signUp(email, password)
       if (error) { setError(error.message); setLoading(false); return }
+      const token = data.session?.access_token
       await fetch(`${API_URL}/game/profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ user_id: data.user.id, username: username.trim() }),
       })
     } else {
