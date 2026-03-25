@@ -8,7 +8,12 @@ import os
 from fastapi import HTTPException, Header
 from jose import jwt, JWTError
 
-SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "")
+_jwt_secret_raw = os.environ.get("SUPABASE_JWT_SECRET", "")
+try:
+    SUPABASE_JWT_SECRET: bytes | str = base64.b64decode(_jwt_secret_raw)
+except Exception:
+    SUPABASE_JWT_SECRET = _jwt_secret_raw
+
 QUESTION_TOKEN_SECRET = os.environ.get("QUESTION_TOKEN_SECRET", "dev-question-secret-change-in-prod")
 
 

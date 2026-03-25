@@ -147,12 +147,17 @@ def join_room(payload: JoinRoomRequest, db: Session = Depends(get_db), current_u
 
 
 def validate_ws_token(token: str, user_id: str) -> bool:
-    secret = os.environ.get("SUPABASE_JWT_SECRET", "")
-    if not secret or not token:
+    import base64 as _b64
+    raw = os.environ.get("SUPABASE_JWT_SECRET", "")
+    if not raw or not token:
         return True  # Skip validation in dev if secret not set
     try:
-        from jose import jwt, JWTError
-        payload = jwt.decode(token, secret, algorithms=["HS256"], options={"verify_aud": False})
+        secret = _b64.b64decode(raw)
+    except Exception:
+        secret = raw
+    try:
+        from jose import jwt as jose_jwt
+        payload = jose_jwt.decode(token, secret, algorithms=["HS256"], options={"verify_aud": False})
         return payload.get("sub") == user_id
     except Exception:
         return False
