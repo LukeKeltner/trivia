@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from pydantic import BaseModel
 from database import get_db
 from models import Answer, GameRound, Profile, Question, Subtopic, Topic
+from auth import get_current_user, verify_question_token
 import uuid
 
 router = APIRouter(prefix="/game", tags=["game"])
@@ -18,7 +20,7 @@ class SubmitAnswerRequest(BaseModel):
     question_id: int
     chosen_answer_id: int
     bet: int
-    elapsed_seconds: float = 0
+    question_token: str
 
 
 class UpdateAvatarRequest(BaseModel):
@@ -37,7 +39,9 @@ class UpdateThemeRequest(BaseModel):
 
 
 @router.post("/profile")
-def create_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
+def create_profile(payload: CreateProfileRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    if current_user != payload.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     user_uuid = uuid.UUID(payload.user_id)
     existing = db.query(Profile).filter(Profile.id == user_uuid).first()
     if existing:
@@ -49,7 +53,12 @@ def create_profile(payload: CreateProfileRequest, db: Session = Depends(get_db))
 
 
 @router.post("/submit")
-def submit_answer(payload: SubmitAnswerRequest, db: Session = Depends(get_db)):
+def submit_answer(payload: SubmitAnswerRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    if current_user != payload.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    elapsed_seconds = verify_question_token(payload.question_token, payload.question_id)
+
     answer = db.query(Answer).filter(Answer.id == payload.chosen_answer_id).first()
     if not answer:
         raise HTTPException(status_code=404, detail="Answer not found")
@@ -64,7 +73,7 @@ def submit_answer(payload: SubmitAnswerRequest, db: Session = Depends(get_db)):
     is_correct = answer.is_correct
 
     if is_correct:
-        multiplier = max(0.25, 1.0 - max(0.0, payload.elapsed_seconds - 5) * 0.05)
+        multiplier = max(0.25, 1.0 - max(0.0, elapsed_seconds - 5) * 0.05)
         winnings = round(payload.bet * multiplier)
         profile.coins += winnings
     else:
@@ -104,29 +113,40 @@ def get_profile(user_id: str, db: Session = Depends(get_db)):
 @router.get("/progress/{user_id}")
 def get_progress(user_id: str, db: Session = Depends(get_db)):
     user_uuid = uuid.UUID(user_id)
+
     subtopics = db.query(Subtopic).all()
-    result = []
-    for subtopic in subtopics:
-        total = db.query(Question).filter(Question.subtopic_id == subtopic.id).count()
-        completed = db.query(GameRound.question_id).filter(
-            GameRound.user_id == user_uuid,
-            GameRound.is_correct == True,
-            GameRound.question_id.in_(
-                db.query(Question.id).filter(Question.subtopic_id == subtopic.id)
-            ),
-        ).distinct().count()
-        result.append({
-            "subtopic_id": subtopic.id,
-            "topic_id": subtopic.topic_id,
-            "subtopic_name": subtopic.name,
-            "total": total,
-            "completed": completed,
-        })
-    return result
+
+    totals = dict(
+        db.query(Question.subtopic_id, func.count(Question.id))
+        .group_by(Question.subtopic_id)
+        .all()
+    )
+
+    completed_rows = (
+        db.query(Question.subtopic_id, func.count(GameRound.question_id.distinct()))
+        .join(Question, GameRound.question_id == Question.id)
+        .filter(GameRound.user_id == user_uuid, GameRound.is_correct == True)
+        .group_by(Question.subtopic_id)
+        .all()
+    )
+    completed = dict(completed_rows)
+
+    return [
+        {
+            "subtopic_id": s.id,
+            "topic_id": s.topic_id,
+            "subtopic_name": s.name,
+            "total": totals.get(s.id, 0),
+            "completed": completed.get(s.id, 0),
+        }
+        for s in subtopics
+    ]
 
 
 @router.post("/title")
-def update_title(payload: UpdateTitleRequest, db: Session = Depends(get_db)):
+def update_title(payload: UpdateTitleRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    if current_user != payload.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     profile = db.query(Profile).filter(Profile.id == uuid.UUID(payload.user_id)).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
@@ -136,7 +156,9 @@ def update_title(payload: UpdateTitleRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/reset")
-def reset_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
+def reset_profile(payload: CreateProfileRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    if current_user != payload.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     user_uuid = uuid.UUID(payload.user_id)
     profile = db.query(Profile).filter(Profile.id == user_uuid).first()
     if not profile:
@@ -148,7 +170,9 @@ def reset_profile(payload: CreateProfileRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/theme")
-def update_theme(payload: UpdateThemeRequest, db: Session = Depends(get_db)):
+def update_theme(payload: UpdateThemeRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    if current_user != payload.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     profile = db.query(Profile).filter(Profile.id == uuid.UUID(payload.user_id)).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
@@ -162,7 +186,9 @@ def update_theme(payload: UpdateThemeRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/avatar")
-def update_avatar(payload: UpdateAvatarRequest, db: Session = Depends(get_db)):
+def update_avatar(payload: UpdateAvatarRequest, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    if current_user != payload.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     profile = db.query(Profile).filter(Profile.id == uuid.UUID(payload.user_id)).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")

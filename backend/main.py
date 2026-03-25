@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from routes import topics, questions, game
+from routes import topics, questions, game, competitions
 
 load_dotenv()
 
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(topics.router)
 app.include_router(questions.router)
 app.include_router(game.router)
+app.include_router(competitions.router)
 
 
 @app.get("/")

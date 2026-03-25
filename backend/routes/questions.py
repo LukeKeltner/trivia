@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Question, GameRound
+from auth import make_question_token
 import random
 import uuid
 
@@ -38,6 +39,7 @@ def get_random_question(subtopic_id: int, user_id: str, db: Session = Depends(ge
         "id": question.id,
         "question_text": question.question_text,
         "difficulty": question.difficulty,
+        "question_token": make_question_token(question.id),
         "answers": [
             {"id": a.id, "answer_text": a.answer_text}
             for a in question.answers

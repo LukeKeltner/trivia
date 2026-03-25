@@ -8,8 +8,10 @@ import Question from './pages/Question'
 import Result from './pages/Result'
 import Leaderboard from './pages/Leaderboard'
 import Store from './pages/Store'
+import CompetitionLobby from './pages/CompetitionLobby'
+import CompetitionGame from './pages/CompetitionGame'
 
-const NAV_ROUTES = ['/', '/leaderboard', '/store']
+const NAV_ROUTES = ['/', '/leaderboard', '/store', '/competition']
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -34,6 +36,8 @@ function AppRoutes() {
         <Route path="/question" element={<ProtectedRoute><Question /></ProtectedRoute>} />
         <Route path="/result" element={<ProtectedRoute><Result /></ProtectedRoute>} />
         <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
+        <Route path="/competition" element={<ProtectedRoute><CompetitionLobby /></ProtectedRoute>} />
+        <Route path="/competition/game" element={<ProtectedRoute><CompetitionGame /></ProtectedRoute>} />
       </Routes>
       {showNav && <BottomNav />}
     </>
