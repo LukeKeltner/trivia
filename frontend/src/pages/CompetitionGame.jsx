@@ -302,7 +302,7 @@ export default function CompetitionGame() {
 
         {/* Bet reminder */}
         <p className="text-center text-xs font-bold text-gray-400 mt-4">
-          🪙 {(bet * 2)?.toLocaleString()} coins to the winner
+          Winner nets +{bet?.toLocaleString()} 🪙
         </p>
       </div>
     </div>

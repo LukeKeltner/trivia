@@ -176,7 +176,7 @@ export default function CompetitionLobby() {
                 placeholder="0"
                 className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 text-2xl font-black text-center focus:outline-none focus:border-[var(--color-primary)] transition"
               />
-              <p className="text-xs text-gray-400 font-bold mt-1 text-center">Winner takes both — you win 2× your bet</p>
+              <p className="text-xs text-gray-400 font-bold mt-1 text-center">Winner takes the pot · net gain = your bet amount</p>
             </div>
 
             {createError && (
@@ -233,7 +233,7 @@ export default function CompetitionLobby() {
                   Created by <span className="text-gray-700">{roomPreview.creator_username}</span>
                 </p>
                 <p className="text-sm font-bold text-[var(--color-primary)]">
-                  Bet: {roomPreview.bet.toLocaleString()} 🪙 each · Winner takes {(roomPreview.bet * 2).toLocaleString()} 🪙
+                  Bet: {roomPreview.bet.toLocaleString()} 🪙 each · Win: +{roomPreview.bet.toLocaleString()} 🪙 net
                 </p>
                 {coins !== null && coins < roomPreview.bet && (
                   <p className="text-sm font-bold text-red-500">You don't have enough coins.</p>

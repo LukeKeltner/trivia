@@ -301,7 +301,7 @@ async def competition_websocket(
                 })
 
                 # Notify opponent of progress update
-                opponent_id = joiner_id if user_id == creator_id else creator_id
+                opponent_id = state["joiner_id"] if user_id == state["creator_id"] else state["creator_id"]
                 if opponent_id and opponent_id in connections.get(room_code, {}):
                     await connections[room_code][opponent_id].send_json({
                         "type": "opponent_progress",
@@ -315,7 +315,7 @@ async def competition_websocket(
 
                     db.expire_all()
                     winner_profile = db.query(Profile).filter(Profile.id == uuid.UUID(user_id)).first()
-                    loser_id = joiner_id if user_id == creator_id else creator_id
+                    loser_id = state["joiner_id"] if user_id == state["creator_id"] else state["creator_id"]
                     loser_profile = db.query(Profile).filter(Profile.id == uuid.UUID(loser_id)).first() if loser_id else None
 
                     if winner_profile:
