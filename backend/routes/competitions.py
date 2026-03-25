@@ -8,7 +8,6 @@ import uuid
 import random
 import string
 import time
-import os
 
 router = APIRouter(prefix="/competitions", tags=["competitions"])
 
@@ -147,18 +146,12 @@ def join_room(payload: JoinRoomRequest, db: Session = Depends(get_db), current_u
 
 
 def validate_ws_token(token: str, user_id: str) -> bool:
-    import base64 as _b64
-    raw = os.environ.get("SUPABASE_JWT_SECRET", "")
-    if not raw or not token:
-        return True  # Skip validation in dev if secret not set
+    if not token:
+        return True  # Allow unauthenticated in dev
     try:
-        secret = _b64.b64decode(raw)
-    except Exception:
-        secret = raw
-    try:
-        from jose import jwt as jose_jwt
-        payload = jose_jwt.decode(token, secret, algorithms=["HS256"], options={"verify_aud": False})
-        return payload.get("sub") == user_id
+        from auth import _verify_token
+        sub = _verify_token(token)
+        return sub == user_id
     except Exception:
         return False
 

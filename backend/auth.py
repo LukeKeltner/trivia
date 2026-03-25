@@ -5,34 +5,63 @@ import json
 import base64
 import os
 
+import httpx
 from fastapi import HTTPException, Header
 from jose import jwt, JWTError
 
-_jwt_secret_raw = os.environ.get("SUPABASE_JWT_SECRET", "")
-try:
-    SUPABASE_JWT_SECRET: bytes | str = base64.b64decode(_jwt_secret_raw)
-except Exception:
-    SUPABASE_JWT_SECRET = _jwt_secret_raw
-
+_jwt_secret = os.environ.get("SUPABASE_JWT_SECRET", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 QUESTION_TOKEN_SECRET = os.environ.get("QUESTION_TOKEN_SECRET", "dev-question-secret-change-in-prod")
 
+_jwks_cache = None
 
-def get_current_user(authorization: str = Header(None)) -> str:
-    if not SUPABASE_JWT_SECRET:
-        raise HTTPException(status_code=500, detail="SUPABASE_JWT_SECRET not configured")
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing authorization header")
-    token = authorization.removeprefix("Bearer ")
+
+def _get_jwks() -> dict:
+    global _jwks_cache
+    if _jwks_cache is None:
+        try:
+            resp = httpx.get(f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json", timeout=5)
+            _jwks_cache = resp.json()
+        except Exception:
+            _jwks_cache = {"keys": []}
+    return _jwks_cache
+
+
+def _verify_token(token: str) -> str:
+    """Verify a Supabase JWT (HS256 or ES256) and return the user's sub (UUID)."""
     try:
-        payload = jwt.decode(
-            token,
-            SUPABASE_JWT_SECRET,
-            algorithms=["HS256"],
-            options={"verify_aud": False},
-        )
+        header = jwt.get_unverified_header(token)
+        alg = header.get("alg", "HS256")
+
+        if alg == "HS256":
+            payload = jwt.decode(
+                token,
+                _jwt_secret,
+                algorithms=["HS256"],
+                options={"verify_aud": False},
+            )
+        else:
+            jwks = _get_jwks()
+            kid = header.get("kid")
+            key = next((k for k in jwks.get("keys", []) if k.get("kid") == kid), None)
+            if not key:
+                raise JWTError("Signing key not found")
+            payload = jwt.decode(
+                token,
+                key,
+                algorithms=["ES256"],
+                options={"verify_aud": False},
+            )
+
         return payload["sub"]
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+def get_current_user(authorization: str = Header(None)) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing authorization header")
+    return _verify_token(authorization.removeprefix("Bearer "))
 
 
 def make_question_token(question_id: int) -> str:
